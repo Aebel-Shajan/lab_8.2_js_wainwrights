@@ -2,13 +2,24 @@
 const wainwrightListElement = document.querySelector("#wainwrights-list");
 const search = document.querySelector("#search");
 let filter = "";
+let wainwrights;
 
 // Main function
 const main = async () => {
-    const wainwrights = await getAllWainWrights(filter);
-    wainwrights.forEach(wainwright => {
-        wainwrightListElement.appendChild(createWainwrightElement(wainwright));
-    })
+    wainwrightListElement.innerHTML = "";
+    const loadingElement = document.createElement("p");
+    loadingElement.innerText = "Awaiting API..";
+    wainwrightListElement.appendChild(loadingElement);
+    await delay(1000);
+    try {
+        wainwrights = await getAllWainWrights(filter);
+        loadingElement.remove();
+        wainwrights.forEach(wainwright => {
+            wainwrightListElement.appendChild(createWainwrightElement(wainwright));
+        })
+    } catch {
+        loadingElement.innerText = "Error fetching API!";
+    }
 }
 main();
 
@@ -16,16 +27,15 @@ main();
 search.addEventListener("submit", (evt) => {
     evt.preventDefault();
     filter = evt.target.querySelector("#text").value;
-    wainwrightListElement.innerHTML = "";
     main();
 })
 
 // Helpers
 async function getAllWainWrights(filter) {
-    const respnose = await fetch("https://raw.githubusercontent.com/annahndr/annahndr.github.io/master/wainwrights_data/wainwrights.json");
-    let data = await respnose.json();
+    const response = await fetch("https://raw.githubusercontent.com/annahndr/annahndr.github.io/master/wainwrights_data/wainwrights.json");
+    let data = await response.json();
     if (filter !== "") {
-        data = data.filter((element, index) => {
+        data = data.filter((element) => {
             console.log(element["name"].includes(filter))
             return element["name"].toLowerCase().includes(filter.toLowerCase());
         })
@@ -41,15 +51,19 @@ function createWainwrightElement(wainwright) {
     container.appendChild(nameElement);
     container.appendChild(heightElement);
     container.appendChild(areaElement);
-
     nameElement.innerText = wainwright["name"];
-    heightElement.innerText = wainwright["heightMetres"];
+    heightElement.innerText = `height: ${wainwright["heightMetres"]} m`;
     Object.keys(wainwright.area).forEach((key) => {
         const listItem = document.createElement("li");
         listItem.innerText = `${key} : ${wainwright.area[key]}`;
         areaElement.appendChild(listItem);
     })
-    
     return container;
 }
 
+// https://alvarotrigo.com/blog/wait-1-second-javascript/
+function delay(milliseconds) {
+    return new Promise(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
+}
