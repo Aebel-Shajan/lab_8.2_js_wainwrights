@@ -6,9 +6,19 @@ let filter = "";
 // Main function
 const main = async () => {
     const wainwrights = await getAllWainWrights(filter);
-    console.log(wainwrights);
+    wainwrights.forEach(wainwright => {
+        wainwrightListElement.appendChild(createWainwrightElement(wainwright));
+    })
 }
 main();
+
+// Event Listeners
+search.addEventListener("submit", (evt) => {
+    evt.preventDefault();
+    filter = evt.target.querySelector("#text").value;
+    wainwrightListElement.innerHTML = "";
+    main();
+})
 
 // Helpers
 async function getAllWainWrights(filter) {
@@ -23,4 +33,23 @@ async function getAllWainWrights(filter) {
     return data;
 }
 
+function createWainwrightElement(wainwright) {
+    const container = document.createElement("li");
+    const nameElement = document.createElement("h2");
+    const heightElement = document.createElement("p");
+    const areaElement = document.createElement("ul");
+    container.appendChild(nameElement);
+    container.appendChild(heightElement);
+    container.appendChild(areaElement);
+
+    nameElement.innerText = wainwright["name"];
+    heightElement.innerText = wainwright["heightMetres"];
+    Object.keys(wainwright.area).forEach((key) => {
+        const listItem = document.createElement("li");
+        listItem.innerText = `${key} : ${wainwright.area[key]}`;
+        areaElement.appendChild(listItem);
+    })
+    
+    return container;
+}
 
