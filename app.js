@@ -4,7 +4,11 @@ const search = document.querySelector("#search");
 let filter = "";
 
 // Main function
-const wainwrights = await getAllWainWrights(filter);
+const main = async () => {
+    const wainwrights = await getAllWainWrights(filter);
+    console.log(wainwrights);
+}
+main();
 
 // Helpers
 async function getAllWainWrights(filter) {
